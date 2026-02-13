@@ -1,0 +1,13 @@
+batch_run: true
+sanity_check: true
+specific_solvers:
+#  - 'sqa-4-tables-solver'
+#  - 'openai-deep-research-solver'
+#  - 'falcon-solver'
+query_constraints: []
+query_excludes: []
+experiment_name: sample-queries
+all_ingredients_file: logs_extraction/20251021-1541-generation_output.jsonl
+log_dir: logs_unification
+unifier_models:
+  - claude-opus-4-20250514

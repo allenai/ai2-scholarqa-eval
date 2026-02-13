@@ -1,0 +1,7 @@
+# Core dependencies
+anthropic>=0.18.0
+numpy
+pandas>=2.0.0
+PyYAML>=6.0
+scipy
+tqdm>=4.65.0

@@ -1,0 +1,228 @@
+import os
+import json
+import time
+import tqdm
+import pandas as pd
+import yaml
+
+from anthropic import Anthropic
+from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
+from anthropic.types.messages.batch_create_params import Request
+
+from utils_rubric_building import make_batch_request
+
+SYSTEM_PROMPT = """I will provide you a query that tests literature knowledge and a report from a system. You will use the system report to identify key requirements or "ingredients" that the report sees as necessary for answering the question. Each ingredient should include a high level descriptor of what is expected in an answer, and a list of examples or details (if relevant).
+
+How to write a good ingredient:
+* Each ingredient should include one requirement at a time. For example, instead of "The answer should mention the challenges of manual construction of an ontology and discuss the use of automated methods for aiding the process." have two ingredients: "The answer should mention the challenges of manual construction of an ontology" and “The answer should discuss the use of automated methods for aiding the ontology construction."
+* Each ingredient should address a different component of the query. If the query requests “Effect of phonemic perceptions is evident in language acquisition, speech comprehension, and second language learning”, a single ingredient shouldn’t try to address all three “language acquisition”, “speech comprehension”, and “second language learning”. Ideally these should be separated out into multiple requirements.
+* Identify which are critically important ingredients. Critical ingredients are those, if not satisfied, would render the response useless. This is a judgement call you must make by closely considering what the QUESTION IS REQUESTING. For example, if a question asks for "coding datasets for assessing LLM capabilities", then identifying the most common or accepted coding evaluation dataset & benchmarks, and possibly also their details (e.g., notable methods used) would be critically important. However, ingredients that, for example, delve into the theoretical background of a particular evaluation or discuss future research directions would not NOT be critically important. For critically important information use SHOULD (e.g., "The answer should cover ..."), otherwise use MIGHT (e.g., "The answer might cover ...").
+* Use the main verb judiciously according to what you observe in the report: if the information should be mentioned in passing, you might use language like "The answer should MENTION/TOUCH ON ...". If it should be covered in some detail language like "The answer should DISCUSS/EXPLAIN/DETAIL ..." would be appropriate. If the answer should list items then it would be fitting to write "The answer should LIST/ENUMERATE ..."
+* Unless specifically required by the question, the ingredient should avoid using specific numbers or qualifiers in the ingredient description: e.g., “The answer should list the three main challenges that…” → “The answer should list the main challenges that ...” OR “The answer should list main challenges such as hallucination or grounding problems that …”
+
+An ingredient MUST:
+* Be agnostic as to where in the report it appears (e.g., "should begin by explaining" --> "should explain"; "might conclude by noting" --> "might note")
+* Be self-contained and understandable without needing to know about other ingredients (e.g. In "The answer should also mention other common approaches" language like "also" and "other" rely on other ingredients for disambiguation).
+* Not make reference to other ingredients (e.g. pronouns like "these" in "should further describe these approaches" that refer to the previous ingredient should be avoided and be replaced with mentions)
+* Not contain (ultra) specific information, unless the question specifically calls for it. List them as "examples" instead. If an ingredient mentioned the need for datasets, the examples would be the specific datasets that the report mentions
+* Refrain from including specific mentions of variants with limited shelf life. For example, put "Honey Smacks" or "Special K" in the examples under a more generic "Kellogg's cereals". Try "Apple OS" in the ingredients instead of "Big Sur" or "Mojave".
+
+Further Rules and Guidelines:
+* Step through the report sequentially
+* In writing your ingredients and examples, only use information contained in the report.
+* Cover as much of the relevant portions of the report as possible.
+* Content you include in the ingredient or examples do source from the report (not elsewhere)
+* No references should be made to the reference report itself: e.g., don’t write “The answer should briefly define each of the key concepts introduced in the report” → instead write “The answer should briefly define each of the key concepts such as…”
+
+Note that ingredients are requirements. Phrase them as requirements an answer should fulfill: start with "The answer should " (for answer critical ingredients) or "The answer might " (for non answer critical ingredients).
+Return a json as an answer:
+[
+{ 
+"id": sequential numerical ingredient id,
+"ingredient": description of the ingredient/requirement,
+"examples": [{ "detail": examples/details if relevant, "citation": citation if available; null if not available },... ]
+}, ...
+]
+Acceptable forms of citations:
+* If corpusId is specified in the report, cite the number, e.g., "citation": "13756489"
+* If the URL (e.g. to arxiv) is specified, cite the URL, e.g., "citation": "https://arxiv.org/abs/1706.03762"
+* If Author and Year as specified: "citation", e.g., "(Vaswani et al, 2017)"
+* If no citations are available, e.g., "citation": null
+"""
+
+BATCH = True
+SANITYCHECK = True
+client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+default_log_dir = 'logs_extraction'
+
+
+def main(config: dict):
+    log_dir = config['log_dir'] if config['log_dir'] != '' else default_log_dir
+    os.makedirs(log_dir, exist_ok=True)
+
+    df_input = pd.read_json(open(config['all_report_relevant_text_file']), lines=True)
+    print('Models:', config['extractor_model'])
+    all_solvers = set(df_input.solver.tolist())
+    batch_id = None
+
+    if config['specific_solvers']:
+        print('Solvers Considered:', config['specific_solvers'])
+        df, _ = format_outputs(df_input, specific_solvers=config['specific_solvers'], log_dir=log_dir)
+    else:
+        print('Solvers Considered:', all_solvers)
+        df, _ = format_outputs(df_input, log_dir=log_dir)
+
+    if config['batch_run']:
+        print('Batch processing')
+        requests = collect_requests(df, config['extractor_model'], config['query_constraints'] if config['query_constraints'] else None, config['query_excludes'] if config['query_excludes'] else None, log_dir=log_dir)
+        if config['sanity_check']:
+            print('SANITY CHECK ON')
+            pass
+        else:
+            batch_id = make_batch_request(requests, client)
+    else:
+        print('Individual processing') # the generations are appended to the output file
+        model_outfile = f'{log_dir}/indiv-unified-generations.json'
+
+        generate_claude(df, config['extractor_model'], model_outfile,  config['query_constraints'] if config['query_constraints'] else None, config['query_excludes'] if config['query_excludes'] else None, config['sanity_check'])
+
+    run_info = {
+        'experiment_name': config['experiment_name'],
+        'solver_ingredients_file': config['all_report_relevant_text_file'],
+        'solvers': config['specific_solvers'] if config['specific_solvers'] else list(all_solvers),
+        'batch': config['batch_run'],
+        'unifier_models': config['extractor_model'],
+        'query_constraints': config['query_constraints'],
+        'query_excludes': config['query_excludes'],
+        'batch_id': batch_id
+    }
+
+    with open(os.path.join(log_dir, f'{time.strftime("%Y%m%d-%H%M")}-run_info.json'), 'w') as fout:
+        json.dump(run_info, fout, indent=2)
+
+
+def format_outputs(df, specific_solvers=None, custom_id_start = 0, log_dir=default_log_dir):
+    dfs = df if specific_solvers is None else df[df['solver'].isin(specific_solvers)]
+
+    responses = []
+    i = custom_id_start
+    for rid,row in dfs.iterrows():
+        responses.append({
+            'custom_id': f'q{i}',
+            'query': row['query'],
+            'solver': row['solver'],
+            'report': row['answer_edited'],
+            'system': f"{SYSTEM_PROMPT}\n",
+        })
+        i += 1
+
+    df2 = pd.DataFrame(responses)
+    df2.to_json(os.path.join(log_dir, f'{time.strftime("%Y%m%d-%H%M")}-request_reference.json'), indent=4, orient="records")
+    return df2, i
+
+def collect_requests(df, model, query_constraints=None, exclude_constraints=None, log_dir=default_log_dir):
+    requests = []
+    for _,row in df.iterrows():
+        if query_constraints is not None and row['query'] not in query_constraints:
+            continue
+
+        if query_constraints is not None and row['query'] in exclude_constraints:
+            continue
+
+        prompt = row[['query', 'report']].to_json()
+        requests.append(Request(
+            custom_id=row['custom_id'],
+            params=MessageCreateParamsNonStreaming(
+                model=model,
+                max_tokens=8192,
+                system=[
+                    {
+                        "type": "text",
+                        "text": SYSTEM_PROMPT,
+                        "cache_control": {
+                            "type": "ephemeral",
+                        }
+                    },
+                ],
+                thinking={
+                    "type": "enabled",
+                    "budget_tokens": 3072,
+                },  # Enable extended thinking mode
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": prompt
+                            }
+                        ]
+                    }
+                ]
+            )
+        ))
+
+    with open(os.path.join(log_dir, f'{time.strftime("%Y%m%d-%H%M")}_batch_requests.json'), 'w') as outfile:
+        json.dump(requests, outfile, indent=4)
+
+    print('Request Total: {}'.format(len(requests)))
+
+    return requests
+
+
+def generate_claude(df, model, model_outfile, query_constraints=None, exclude_constraints=None, sanity_check=True):
+    with open(model_outfile, 'a') as fout:
+        for _, item in tqdm.tqdm(df.iterrows(), desc=f'Extracting ingredients from {model}'):
+
+            if query_constraints is not None and item['query'] not in query_constraints:
+                continue
+
+            if query_constraints is not None and item['query'] in exclude_constraints:
+                continue
+
+            prompt = item[['query', 'report']].to_json()
+
+            if not sanity_check:
+                response = client.messages.create(
+                    model=model,
+                    system=[
+                        {
+                            "type": "text",
+                            "text": SYSTEM_PROMPT,
+                            "cache_control": {"type": "ephemeral"}
+                            },
+                        ],
+                    thinking={
+                        "type": "enabled",
+                        "budget_tokens": 3072,
+                        },  # Enable extended thinking mode
+                    messages=[
+                        {"role": "user", "content": prompt}
+                        ],
+                    max_tokens=8192
+                    )
+
+                response_out = {
+                    'query': item['query'],
+                    'solver': item['solver'],
+                    'report': item['report'],
+                    'system': SYSTEM_PROMPT,
+                    'prompt': prompt,
+                    'model': model,
+                    'generation': response.content[1].text,
+                    'usage': {'input_tokens': response.usage.input_tokens, 'output_tokens': response.usage.output_tokens},
+                    }
+                fout.write(json.dumps(response_out))
+            else:
+                print(f'{SYSTEM_PROMPT}\n{prompt}\n===================')
+
+
+if __name__ == "__main__":
+    try:
+        with open('config_extract_ingredients.yaml', 'r') as file:
+            data = yaml.safe_load(file)
+        main(data)
+    except FileNotFoundError:
+        print("Error: 'config.yaml' not found.")
+    except yaml.YAMLError as exc:
+        print(f"Error parsing YAML: {exc}")
