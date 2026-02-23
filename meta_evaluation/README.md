@@ -47,7 +47,11 @@ Each annotation entry contains pairwise comparison data:
 Run the agreement analysis script:
 
 ```bash
+# From the meta_evaluation directory:
 python calculate_agreement.py [OPTIONS]
+
+# Or from the repo root:
+python meta_evaluation/calculate_agreement.py [OPTIONS]
 ```
 
 Configuration options:

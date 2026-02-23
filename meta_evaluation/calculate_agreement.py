@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import numpy as np
 import argparse
 import scipy.stats as stats
 import pandas as pd
 import math
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_and_concatenate_jsons(human_agreed_only=False):
     if human_agreed_only:
-        files = [('authored', "annotation/pairwise_authored.json"),
-                 ('chosen', "annotation/pairwise_chosen.json"),
-                 ('dev_assigned', "annotation/pairwise_dev_assigned_agreement_only.json"),
-                 ('test_assigned', "annotation/pairwise_test_assigned_agreement_only.json"),
+        files = [('authored', os.path.join(SCRIPT_DIR, "annotation/pairwise_authored.json")),
+                 ('chosen', os.path.join(SCRIPT_DIR, "annotation/pairwise_chosen.json")),
+                 ('dev_assigned', os.path.join(SCRIPT_DIR, "annotation/pairwise_dev_assigned_agreement_only.json")),
+                 ('test_assigned', os.path.join(SCRIPT_DIR, "annotation/pairwise_test_assigned_agreement_only.json")),
         ]
     else:
-        files = [('authored', "annotation/pairwise_authored.json"),
-                 ('chosen', "annotation/pairwise_chosen.json"),
-                 ('dev_assigned_1', "annotation/pairwise_dev_assigned_ann1.json"),
-                 ('dev_assigned_2', "annotation/pairwise_dev_assigned_ann2.json"),
-                 ('test_assigned_1', "annotation/pairwise_test_assigned_ann1.json"),
-                 ('test_assigned_2', "annotation/pairwise_test_assigned_ann2.json"),
+        files = [('authored', os.path.join(SCRIPT_DIR, "annotation/pairwise_authored.json")),
+                 ('chosen', os.path.join(SCRIPT_DIR, "annotation/pairwise_chosen.json")),
+                 ('dev_assigned_1', os.path.join(SCRIPT_DIR, "annotation/pairwise_dev_assigned_ann1.json")),
+                 ('dev_assigned_2', os.path.join(SCRIPT_DIR, "annotation/pairwise_dev_assigned_ann2.json")),
+                 ('test_assigned_1', os.path.join(SCRIPT_DIR, "annotation/pairwise_test_assigned_ann1.json")),
+                 ('test_assigned_2', os.path.join(SCRIPT_DIR, "annotation/pairwise_test_assigned_ann2.json")),
         ]
 
     combined_data = []
@@ -537,8 +540,11 @@ def main():
         print("=" * 70)
         iaa,iaa_hc = calculate_iaa([data_annotator_1, data_annotator_2], drop_elicit=args.drop_elicit, subselect_models=subselect_models)
 
-        print(f'Strict: {sum(iaa)/len(iaa)}')
-        print(f'Half Credit: {sum(iaa_hc)/len(iaa_hc)}')
+        if len(iaa) > 0:
+            print(f'Strict: {sum(iaa)/len(iaa)}')
+            print(f'Half Credit: {sum(iaa_hc)/len(iaa_hc)}')
+        else:
+            print('No overlapping annotations found for IAA calculation.')
 
 
     print("="*70)

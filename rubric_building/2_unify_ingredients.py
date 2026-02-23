@@ -59,14 +59,27 @@ Return a json:
 }
 """
 
-client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 default_log_dir = 'logs_unification'
+_client = None
+
+
+def get_client():
+    global _client
+    if _client is None:
+        _client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    return _client
 
 def main(config: dict):
     log_dir = config['log_dir'] if config['log_dir'] != '' else default_log_dir
+    if not os.path.isabs(log_dir):
+        log_dir = os.path.join(SCRIPT_DIR, log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    df = pd.read_json(open(config['all_ingredients_file']), lines=True)
+    ingredients_file = config['all_ingredients_file']
+    if not os.path.isabs(ingredients_file):
+        ingredients_file = os.path.join(SCRIPT_DIR, ingredients_file)
+    df = pd.read_json(open(ingredients_file), lines=True)
     print('Models:', config['unifier_models'])
     all_solvers = set(df.solver.tolist())
     batch_id = None
@@ -87,10 +100,10 @@ def main(config: dict):
             print('SANITY CHECK ON')
             pass
         else:
-            batch_id = make_batch_request(requests, client)
+            batch_id = make_batch_request(requests, get_client())
     else:
         print('Individual processing') # the generations are appended to the output file
-        model_outfile = 'logs_unification/indiv-unified-generations.json'
+        model_outfile = os.path.join(log_dir, 'indiv-unified-generations.json')
 
         for model in config['unifier_models']:
             for dft in exp_sets:
@@ -232,7 +245,7 @@ def gen_unification(df, model, model_outfile, query_constraints=None, exclude_co
             prompt = row.to_json()
 
             if not sanity_check:
-                response = client.messages.create(
+                response = get_client().messages.create(
                     model = model,
                     system=[
                         {
@@ -276,11 +289,12 @@ def gen_unification(df, model, model_outfile, query_constraints=None, exclude_co
 
 if __name__ == "__main__":
     try:
-        with open('config_unify_ingredients.yaml', 'r') as file:
+        config_path = os.path.join(SCRIPT_DIR, 'config_unify_ingredients.yaml')
+        with open(config_path, 'r') as file:
             data = yaml.safe_load(file)
         main(data)
     except FileNotFoundError:
-        print("Error: 'config.yaml' not found.")
+        print("Error: 'config_unify_ingredients.yaml' not found.")
     except yaml.YAMLError as exc:
         print(f"Error parsing YAML: {exc}")
 

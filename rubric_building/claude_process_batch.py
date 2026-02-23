@@ -7,7 +7,14 @@ from anthropic import Anthropic
 
 from utils_rubric_building import parse_json
 
-client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+_client = None
+
+
+def get_client():
+    global _client
+    if _client is None:
+        _client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    return _client
 
 def main(this_run, run_prefix, log_dir, saved_generation=None):
     run_info = json.load(open(os.path.join(log_dir, f'{run_prefix}-run_info.json')))
@@ -54,7 +61,7 @@ def main(this_run, run_prefix, log_dir, saved_generation=None):
             gen = []
             total = 0
             successful = 0
-            for result in client.messages.batches.results(batch_id):
+            for result in get_client().messages.batches.results(batch_id):
                 total += 1
                 if result.result.type == 'succeeded':
                     if len(result.result.message.content) == 0:
@@ -131,7 +138,7 @@ def main(this_run, run_prefix, log_dir, saved_generation=None):
         outfilename = os.path.join(log_dir,f'{run_prefix}-generation_output.jsonl')
 
         gen = []
-        for result in client.messages.batches.results(batch_id):
+        for result in get_client().messages.batches.results(batch_id):
             if result.result.type == 'succeeded':
                 if len(result.result.message.content) == 0:
                     print(f'Generation failed: {result.custom_id}')
@@ -152,12 +159,12 @@ def main(this_run, run_prefix, log_dir, saved_generation=None):
         check_status(batch_id)
 
     elif this_run == "cancel_batch":
-        message_batch = client.messages.batches.cancel(batch_id)
+        message_batch = get_client().messages.batches.cancel(batch_id)
         print(message_batch)
 
 
 def check_status(batch_id):
-    message_batch = client.messages.batches.retrieve(batch_id)
+    message_batch = get_client().messages.batches.retrieve(batch_id)
     print(f"Batch {message_batch.id} processing status is {message_batch.processing_status}\n")
     print(message_batch)
 
@@ -240,7 +247,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-r", "--run", required=True, type=str, help="check_status | process_extraction_results | process_unification_results | cancel_batch")
-    parser.add_argument("-l", "--log_dir", type=str, help="log directory", default="logs")
+    parser.add_argument("-l", "--log_dir", type=str, help="log directory (e.g., logs_extraction or logs_unification)", required=True)
     parser.add_argument("-p", "--run_prefix", type=str, help="run prefix, e.g., 20250624-2123 (all files assoc with the same batch should have the same prefix)")
     parser.add_argument("-s", "--saved_generation", type=str, help="filename of saved generation in case you've already pulled this from anthropic already, and don't want to reissue the pull")
 

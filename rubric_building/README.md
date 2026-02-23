@@ -47,7 +47,11 @@ export ANTHROPIC_API_KEY='your-api-key-here'
 Extract key requirements from system reports:
 
 ```bash
+# From the rubric_building directory:
 python 1_generate_ingredients.py
+
+# Or from the repo root:
+python rubric_building/1_generate_ingredients.py
 ```
 
 Configuration options in `config_extract_ingredients.yaml`:
@@ -66,13 +70,17 @@ Configuration options in `config_extract_ingredients.yaml`:
 Consolidate ingredients from multiple sources into unified rubrics:
 
 ```bash
+# From the rubric_building directory:
 python 2_unify_ingredients.py
+
+# Or from the repo root:
+python rubric_building/2_unify_ingredients.py
 ```
 
 Configuration options in `config_unify_ingredients.yaml`:
 - `batch_run`: Use batch processing (recommended)
 - `sanity_check`: Preview requests without sending API call
-- `all_ingredients_file`: Path to extraction output from Stage 1
+- `all_ingredients_file`: Path to extraction output from Stage 1. **Update this** to point to your actual Stage 1 output (e.g., `logs_extraction/YYYYMMDD-HHMM-generation_output.jsonl`)
 - `unifier_models`: List of models to use for unification
 - `log_dir`: Output directory for results
 
@@ -101,6 +109,49 @@ Arguments:
 - `-l, --log_dir`: Log directory containing run files
 - `-p, --run_prefix`: Timestamp prefix from run_info.json file
 - `-s, --saved_generation`: (Optional) Use cached generation results
+
+## Quick Start: End-to-End Walkthrough
+
+This walkthrough runs the full pipeline. Stage 1 can be tested in sanity-check mode (no API calls, no API key needed).
+
+### 1. Extract ingredients (dry run)
+Verify that `config_extract_ingredients.yaml` has `sanity_check: true` (the default), then run:
+```bash
+python rubric_building/1_generate_ingredients.py
+```
+This prints the prompts that would be sent to the API without making any calls.
+
+### 2. Extract ingredients (live run)
+Set `sanity_check: false` in `config_extract_ingredients.yaml`, then:
+```bash
+export ANTHROPIC_API_KEY='your-key'
+python rubric_building/1_generate_ingredients.py
+```
+The batch job ID and metadata are saved to `logs_extraction/`.
+
+### 3. Process Stage 1 batch results
+Once the batch completes:
+```bash
+python rubric_building/claude_process_batch.py -r check_status -l logs_extraction -p YYYYMMDD-HHMM
+python rubric_building/claude_process_batch.py -r process_extraction_results -l logs_extraction -p YYYYMMDD-HHMM
+```
+This writes `logs_extraction/YYYYMMDD-HHMM-generation_output.jsonl`.
+
+### 4. Unify ingredients
+Update `config_unify_ingredients.yaml`:
+- Set `all_ingredients_file` to the output from Step 3 (e.g., `logs_extraction/YYYYMMDD-HHMM-generation_output.jsonl`)
+- Set `sanity_check: false`
+
+```bash
+python rubric_building/2_unify_ingredients.py
+```
+
+### 5. Process Stage 2 batch results
+```bash
+python rubric_building/claude_process_batch.py -r check_status -l logs_unification -p YYYYMMDD-HHMM
+python rubric_building/claude_process_batch.py -r process_unification_results -l logs_unification -p YYYYMMDD-HHMM
+```
+Final rubrics are written to `outputs/`.
 
 ## Pipeline Details
 
