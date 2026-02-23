@@ -16,8 +16,12 @@ See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
 
 ## Requirements
 
-Install dependencies:
+Python 3.10+ is recommended.
+
+Set up a conda environment and install dependencies:
 ```bash
+conda create -n ai2-scholarqa-eval python=3.10 -y
+conda activate ai2-scholarqa-eval
 pip install -r requirements.txt
 ```
 
@@ -25,3 +29,5 @@ For rubric building with Claude API:
 ```bash
 export ANTHROPIC_API_KEY='your-api-key-here'
 ```
+
+**Note:** The `ANTHROPIC_API_KEY` is only required when running the rubric building scripts with `sanity_check: false` in the config. You can do a dry run with `sanity_check: true` (the default) without setting the key.

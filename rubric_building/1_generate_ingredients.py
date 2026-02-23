@@ -50,17 +50,28 @@ Acceptable forms of citations:
 * If no citations are available, e.g., "citation": null
 """
 
-BATCH = True
-SANITYCHECK = True
-client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 default_log_dir = 'logs_extraction'
+_client = None
+
+
+def get_client():
+    global _client
+    if _client is None:
+        _client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    return _client
 
 
 def main(config: dict):
     log_dir = config['log_dir'] if config['log_dir'] != '' else default_log_dir
+    if not os.path.isabs(log_dir):
+        log_dir = os.path.join(SCRIPT_DIR, log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    df_input = pd.read_json(open(config['all_report_relevant_text_file']), lines=True)
+    input_file = config['all_report_relevant_text_file']
+    if not os.path.isabs(input_file):
+        input_file = os.path.join(SCRIPT_DIR, input_file)
+    df_input = pd.read_json(open(input_file), lines=True)
     print('Models:', config['extractor_model'])
     all_solvers = set(df_input.solver.tolist())
     batch_id = None
@@ -79,7 +90,7 @@ def main(config: dict):
             print('SANITY CHECK ON')
             pass
         else:
-            batch_id = make_batch_request(requests, client)
+            batch_id = make_batch_request(requests, get_client())
     else:
         print('Individual processing') # the generations are appended to the output file
         model_outfile = f'{log_dir}/indiv-unified-generations.json'
@@ -183,7 +194,7 @@ def generate_claude(df, model, model_outfile, query_constraints=None, exclude_co
             prompt = item[['query', 'report']].to_json()
 
             if not sanity_check:
-                response = client.messages.create(
+                response = get_client().messages.create(
                     model=model,
                     system=[
                         {
@@ -219,10 +230,11 @@ def generate_claude(df, model, model_outfile, query_constraints=None, exclude_co
 
 if __name__ == "__main__":
     try:
-        with open('config_extract_ingredients.yaml', 'r') as file:
+        config_path = os.path.join(SCRIPT_DIR, 'config_extract_ingredients.yaml')
+        with open(config_path, 'r') as file:
             data = yaml.safe_load(file)
         main(data)
     except FileNotFoundError:
-        print("Error: 'config.yaml' not found.")
+        print("Error: 'config_extract_ingredients.yaml' not found.")
     except yaml.YAMLError as exc:
         print(f"Error parsing YAML: {exc}")
