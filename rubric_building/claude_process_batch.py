@@ -10,7 +10,8 @@ from utils_rubric_building import parse_json
 client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 def main(this_run, run_prefix, log_dir, saved_generation=None):
-    run_info = json.load(open(os.path.join(log_dir, f'{run_prefix}-run_info.json')))
+    with open(os.path.join(log_dir, f'{run_prefix}-run_info.json')) as f:
+        run_info = json.load(f)
     batch_id = run_info['batch_id']
 
     if batch_id is None:
@@ -21,14 +22,15 @@ def main(this_run, run_prefix, log_dir, saved_generation=None):
     if this_run == 'process_unification_results':
 
         # converted output
-        path_unified = 'outputs/'
+        path_unified = os.path.join(os.path.dirname(__file__),'outputs/')
         if not os.path.exists(path_unified):
             os.makedirs(path_unified)
 
         # Load question ID mapping if available (optional)
         question_id_mapping = None
         if os.path.exists('question_id_mapping.json'):
-            question_id_mapping = {item['question']: item['case_id'] for item in json.load(open('question_id_mapping.json'))}
+            with open('question_id_mapping.json') as f:
+                question_id_mapping = {item['question']: item['case_id'] for item in json.load(f)}
         else:
             print("Note: question_id_mapping.json not found. Using sequential IDs.")
 
@@ -105,8 +107,9 @@ def main(this_run, run_prefix, log_dir, saved_generation=None):
                                 'left_out_ingredients': json_string['left_out_ingredients']
                             })
                             query_count += 1
-                        except:
-                            print('==== Couldnt process: ', gid, row.model)
+                        except Exception as e:
+                            print('==== Couldn\'t process: ', gid, row.model)
+                            print(e)
 
                     out_json_dict.append({
                         'query': gid,
@@ -240,13 +243,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-r", "--run", required=True, type=str, help="check_status | process_extraction_results | process_unification_results | cancel_batch")
-    parser.add_argument("-l", "--log_dir", type=str, help="log directory", default="logs")
+    parser.add_argument("-l", "--log_dir", type=str, help="log directory: logs_extraction  (for processing extraction results) or logs_unification (for processing unification results)", default="logs_extraction")
     parser.add_argument("-p", "--run_prefix", type=str, help="run prefix, e.g., 20250624-2123 (all files assoc with the same batch should have the same prefix)")
     parser.add_argument("-s", "--saved_generation", type=str, help="filename of saved generation in case you've already pulled this from anthropic already, and don't want to reissue the pull")
 
     args = parser.parse_args()
-    if args.run == "process_results" and args.run_prefix is None:
-        parser.error("--run process_results requires --run_prefix")
+    if args.run.startswith("process_") and args.run_prefix is None:
+        parser.error("--run process_extraction_results and process_unification_results require --run_prefix")
 
     else:
-        main(args.run, args.run_prefix, args.log_dir, saved_generation=args.saved_generation if args.saved_generation else None)
+        main(args.run, args.run_prefix, os.path.join(os.path.dirname(__file__),args.log_dir), saved_generation=args.saved_generation if args.saved_generation else None)

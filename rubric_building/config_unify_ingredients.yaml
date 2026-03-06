@@ -1,13 +1,12 @@
 batch_run: true
 sanity_check: true
 specific_solvers:
-#  - 'sqa-4-tables-solver'
-#  - 'openai-deep-research-solver'
-#  - 'falcon-solver'
+#  - 'claude_llm'
+#  - 'gemini_pro_llm'
 query_constraints: []
 query_excludes: []
-experiment_name: sample-queries
-all_ingredients_file: logs_extraction/20251021-1541-generation_output.jsonl
+experiment_name: sample-queries # !! Update
+all_ingredients_file: logs_extraction/20251008-1807-generation_output.jsonl # !! Update. Use the provided file as a test run with sanity_check=true.
 log_dir: logs_unification
-unifier_models:
+unifier_models: # Assumes Claude use
   - claude-opus-4-20250514

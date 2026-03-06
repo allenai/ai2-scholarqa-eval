@@ -1,0 +1,19 @@
+{
+  "experiment_name": "sample-queries",
+  "solver_ingredients_file": "",
+  "solvers": [
+    "gemini_pro_llm",
+    "2025-09-04T10-25-44-07-00_task_sqa_solver_perplexity_dr",
+    "2025-09-04T10-30-22-07-00_task_sqa_solver_storm",
+    "2025-09-04T11-02-46-07-00_task_sqa_solver_sqa_claude-4.0",
+    "o3-deep-research-2025-06-26",
+    "2025-09-04T11-04-10-07-00_task_sqa_solver_you",
+    "claude_llm",
+    "2025-09-04T10-27-39-07-00_task_sqa_solver_fhouse_falcon"
+  ],
+  "batch": true,
+  "unifier_models": "claude-opus-4-20250514",
+  "query_constraints": [],
+  "query_excludes": [],
+  "batch_id": ""
+}

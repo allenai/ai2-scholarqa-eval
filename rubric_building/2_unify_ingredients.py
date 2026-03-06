@@ -59,14 +59,15 @@ Return a json:
 }
 """
 
-client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 default_log_dir = 'logs_unification'
 
 def main(config: dict):
-    log_dir = config['log_dir'] if config['log_dir'] != '' else default_log_dir
+    log_dir = os.path.join(os.path.dirname(__file__),config['log_dir'] if config['log_dir'] != '' else default_log_dir)
     os.makedirs(log_dir, exist_ok=True)
 
-    df = pd.read_json(open(config['all_ingredients_file']), lines=True)
+    timestamp = time.strftime("%Y%m%d-%H%M")
+    with open(config['all_ingredients_file']) as f:
+        df = pd.read_json(f, lines=True)
     print('Models:', config['unifier_models'])
     all_solvers = set(df.solver.tolist())
     batch_id = None
@@ -74,23 +75,24 @@ def main(config: dict):
     exp_sets = []
     if config['specific_solvers']:
         print('Solvers Considered:', config['specific_solvers'])
-        df_unified, _ = unify_outputs(df, specific_solvers=config['specific_solvers'], log_dir=log_dir)
+        df_unified, _ = unify_outputs(df, specific_solvers=config['specific_solvers'], log_dir=log_dir, timestamp=timestamp)
     else:
         print('Solvers Considered:', all_solvers)
-        df_unified, _ = unify_outputs(df, log_dir=log_dir)
+        df_unified, _ = unify_outputs(df, log_dir=log_dir, timestamp=timestamp)
     exp_sets.append(df_unified)
 
     if config['batch_run']:
         print('Batch processing')
-        requests = collect_requests(exp_sets, config['unifier_models'], config['query_constraints'] if config['query_constraints'] else None, config['query_excludes'] if config['query_excludes'] else None, log_dir=log_dir)
+        requests = collect_requests(exp_sets, config['unifier_models'], config['query_constraints'] if config['query_constraints'] else None, config['query_excludes'] if config['query_excludes'] else None, log_dir=log_dir, timestamp=timestamp)
         if config['sanity_check']:
             print('SANITY CHECK ON')
             pass
         else:
+            client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
             batch_id = make_batch_request(requests, client)
     else:
         print('Individual processing') # the generations are appended to the output file
-        model_outfile = 'logs_unification/indiv-unified-generations.json'
+        model_outfile = os.path.join(log_dir,'indiv-unified-generations.json')
 
         for model in config['unifier_models']:
             for dft in exp_sets:
@@ -106,10 +108,10 @@ def main(config: dict):
         'query_excludes': config['query_excludes'],
         'batch_id': batch_id
     }
-    with open(os.path.join(log_dir, f'{time.strftime("%Y%m%d-%H%M")}-run_info.json'), 'w') as fout:
+    with open(os.path.join(log_dir, f'{timestamp}-run_info.json'), 'w') as fout:
         json.dump(run_info, fout, indent=2)
 
-def unify_outputs(df, specific_solvers=None, custom_id_start = 0, log_dir=default_log_dir):
+def unify_outputs(df, specific_solvers=None, custom_id_start=0, log_dir=default_log_dir, timestamp=None):
     dfs = df if specific_solvers is None else df[df['solver'].isin(specific_solvers)]
 
     concatenated = []
@@ -125,18 +127,18 @@ def unify_outputs(df, specific_solvers=None, custom_id_start = 0, log_dir=defaul
         i += 1
     df2 = pd.DataFrame(concatenated)
 
-    df2.to_json(os.path.join(log_dir, f'{time.strftime("%Y%m%d-%H%M")}-ingredient_reference.json'), indent=4, orient="records")
+    df2.to_json(os.path.join(log_dir, f'{timestamp}-ingredient_reference.json'), indent=4, orient="records")
     return df2, i
 
 
-def collect_requests(exp_sets, models, query_constraints=None, exclude_constraints=None, log_dir='logs_unification'):
+def collect_requests(exp_sets, models, query_constraints=None, exclude_constraints=None, log_dir='logs_unification', timestamp=None):
     requests = []
     for df in exp_sets:
         for _, row in df.iterrows():
             if query_constraints is not None and row['query'] not in query_constraints:
                 continue
 
-            if query_constraints is not None and row['query'] in exclude_constraints:
+            if exclude_constraints is not None and row['query'] in exclude_constraints:
                 continue
 
             prompt = row[['query', 'ingredients']].to_json()
@@ -176,7 +178,7 @@ def collect_requests(exp_sets, models, query_constraints=None, exclude_constrain
                     )
                 ))
 
-    with open(os.path.join(log_dir, f'{time.strftime("%Y%m%d-%H%M")}_batch_requests.json'), 'w') as outfile:
+    with open(os.path.join(log_dir, f'{timestamp}_batch_requests.json'), 'w') as outfile:
         json.dump(requests, outfile, indent=4)
 
     print('Request Total: {}'.format(len(requests)))
@@ -226,12 +228,13 @@ def gen_unification(df, model, model_outfile, query_constraints=None, exclude_co
             if query_constraints is not None and row['query'] not in query_constraints:
                 continue
 
-            if query_constraints is not None and row['query'] in exclude_constraints:
+            if exclude_constraints is not None and row['query'] in exclude_constraints:
                 continue
 
             prompt = row.to_json()
 
             if not sanity_check:
+                client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
                 response = client.messages.create(
                     model = model,
                     system=[
@@ -276,11 +279,11 @@ def gen_unification(df, model, model_outfile, query_constraints=None, exclude_co
 
 if __name__ == "__main__":
     try:
-        with open('config_unify_ingredients.yaml', 'r') as file:
+        with open(os.path.join(os.path.dirname(__file__),'config_unify_ingredients.yaml'), 'r') as file:
             data = yaml.safe_load(file)
-        main(data)
     except FileNotFoundError:
-        print("Error: 'config.yaml' not found.")
+        print("Error: 'config_unify_ingredients.yaml' not found.")
     except yaml.YAMLError as exc:
         print(f"Error parsing YAML: {exc}")
 
+    main(data)

@@ -1,106 +1,53 @@
-# Meta-Evaluation: Human-Model Agreement Analysis
+# Meta-Evaluation
 
-This directory contains tools for evaluating agreement between human and automated model evaluations in pairwise comparisons of ScholarQA-CS2 eval system outputs.
+This directory contains code and data supporting the paper:
 
-## Project Structure
+> Hwang et al. 2026, *Deep Research, Shallow Evaluation: A Case Study in Meta-Evaluation for Long-Form QA Benchmarks* [Paper (forthcoming)]
+
+We conduct a case study in meta-evaluation for the ScholarQA-CS2 long-form scientific QA benchmark. We validate the benchmark through human pairwise preference judgments and critically examine this approach's strengths, weaknesses, and confounders—showing that pairwise preferences are best suited for system-level evaluation, while metric-wise annotations and annotator expertise are critical for reliable metric-level assessment.
+
+## Directory Structure
 
 ```
 meta_evaluation/
-├── calculate_agreement.py          # Main analysis script
-└── annotation/
-    ├── pairwise_authored.json      # Authored (Deep-Expert) evaluation set
-    ├── pairwise_chosen.json        # Chosen (Near-Expert) evaluation set
-    ├── pairwise_dev_assigned_ann1.json   # Dev set annotator 1
-    ├── pairwise_dev_assigned_ann2.json   # Dev set annotator 2
-    ├── pairwise_test_assigned_ann1.json  # Test set annotator 1
-    ├── pairwise_test_assigned_ann2.json  # Test set annotator 2
-    ├── pairwise_dev_assigned_agreement_only.json   # Dev set (agreed only)
-    └── pairwise_test_assigned_agreement_only.json  # Test set (agreed only)
+├── system_reports/         # System outputs for evaluated QA systems
+│   ├── dev/                # Dev split (100 questions)
+│   └── test/               # Test split (100 questions)
+└── agreement_calculation/  # Agreement analysis code and annotation data
 ```
 
-## Requirements
+## System Reports
 
-- Python 3.x
-- Required packages:
-  - numpy
-  - pandas
-  - scipy
+The `system_reports/` directory contains the raw outputs from each evaluated system on the ScholarQA-CS2 benchmark questions. Each file is a JSON list of `{"question": ..., "response": ...}` entries.
 
-## Data Format
+The following systems are included:
 
-Each annotation entry contains pairwise comparison data:
-```json
-{
-  "question": "The research question text",
-  "models": ["model_a", "model_b"],
-  "question_intent": "Category of question",
-  "human_overall": [0.85, 0.875],
-  "model_overall": [0.567, 0.564],
-  "human_answer_precision": [...],
-  "model_answer_precision": [...],
-  ...
+| System | File |
+|--------|------|
+| ScholarQA (SQA) | `sqa.json` |
+| ScholarQA + Qwen3-8B SFT | `sqa-qwen3_8b_SFT_fullanswer.json` |
+| Claude Sonnet 4 | `claude-sonnet-4-20250514.json` |
+| Gemini 2.5 Pro | `gemini-2.5-pro-preview-03-25.json` |
+| Elicit | `elicit.json` |
+| Falcon | `falcon.json` |
+| OpenAI Deep Research | `openai-dr.json` |
+| Perplexity | `perplexity.json` |
+| SciSpace | `scispace.json` |
+| STORM | `storm.json` |
+| You.com | `you.json` |
+
+## Agreement Calculation
+
+The `agreement_calculation/` directory contains annotation data and the analysis script for computing agreement between human judgments and automated evaluation metrics. See [`agreement_calculation/README.md`](agreement_calculation/README.md) for full details on the annotation format, usage, and replicating results from the paper.
+
+## Citation
+
+If you use this code or data, please cite:
+
+```bibtex
+@article{hwang2026deepresearch,
+  title     = {Deep Research, Shallow Evaluation: A Case Study in Meta-Evaluation for Long-Form QA Benchmarks},
+  author    = {Hwang et al.},
+  year      = {2026}
 }
 ```
-
-## Usage
-
-Run the agreement analysis script:
-
-```bash
-python calculate_agreement.py [OPTIONS]
-```
-
-Configuration options:
-- `--tie_strategy`: How to handle ties (`threshold`, `exclude`, or `partial`, default: `threshold`)
-- `--dont_use_thresholds`: Disable threshold-based tie detection
-- `--subselect_models`: Comma-delimited list of models to analyze (optional)
-- `--human_agreed`: Only use instances where human annotators agreed
-- `--drop_elicit`: Exclude 'elicit' model from system ranking
-- `--source`: Filter by data source (`authored`, `chosen`, or `assigned`, default: `assigned`)
-
-### Examples
-
-Basic usage with default settings:
-```bash
-python calculate_agreement.py
-```
-
-Calculate agreement only on human-agreed instances:
-```bash
-python calculate_agreement.py --human_agreed
-```
-
-Exclude ties from analysis:
-```bash
-python calculate_agreement.py --tie_strategy exclude
-```
-
-Analyze specific models:
-```bash
-python calculate_agreement.py --subselect_models sqa,openai-dr,perplexity
-```
-
-Use authored data source:
-```bash
-python calculate_agreement.py --source authored
-```
-
-## Output
-
-The script generates three types of analysis:
-
-1. **Inter-Annotator Agreement (IAA)**: When using doubly-annotated data
-   - Strict agreement rate
-   - Half-credit agreement rate (gives credit for one annotator calling a tie)
-
-2. **Agreement Metrics Table**: For each human-model metric pair
-   - Agreement rate
-   - Kendall's tau correlation
-   - Total number of comparisons
-   - Optimal threshold used
-
-3. **System Rankings**: Model performance rankings based on:
-   - Human preference rankings
-   - Automated overall scores
-   - Kendall's tau correlation between rankings
-
