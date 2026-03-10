@@ -5,8 +5,8 @@
 
 This repository contains code and data from **ScholarQA-CS2 Evaluations**, and is associated with two publications:
 
-**[1]** Hwang et al. 2026, *Deep Research, Shallow Evaluation:A Case Study in Meta-Evaluation for Long-Form QA Benchmarks* [[Paper (forthcoming)]]()\
-**[2]** Bragg et al. 2025, *AstaBench: Rigorous Benchmarking of AI Agents with a Scientific Research Suite*. [[Paper]](https://arxiv.org/abs/2510.21652)
+**[1]** Hwang et al. 2026, [*Deep Research, Shallow Evaluation:A Case Study in Meta-Evaluation for Long-Form QA Benchmarks*](https://arxiv.org/abs/2603.06942)\
+**[2]** Bragg et al. 2025, [*AstaBench: Rigorous Benchmarking of AI Agents with a Scientific Research Suite*](https://arxiv.org/abs/2510.21652)
 
 This repository includes:
 1. Code and annotated data from in the human meta-evaluation conducted over of ScholarQA-CS2 **[1]**. 
