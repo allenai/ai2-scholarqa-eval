@@ -53,14 +53,14 @@ To run **rubric building**:
     python rubric_building/2_unify_ingredients.py
     ```
 
-See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
-
-Both scripts uses API key to run Claude. However, sanity-check test runs 
+- Both scripts uses API key to run Claude. However, sanity-check test runs 
 (default set up; quick run without API call) will let you execute the script without it.
 To specify your key run:
-```
-export ANTHROPIC_API_KEY='your-api-key-here'
-```
+    ```
+    export ANTHROPIC_API_KEY='your-api-key-here'
+    ```
+See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
+
 
 
 ## License
@@ -71,3 +71,4 @@ The code is licensed under Apache 2.0. The data is licensed under ODC-BY 1.0. Th
 ## How to Cite
 
 Citations are supplied in the README files within the respective directory.
+
