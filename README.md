@@ -22,7 +22,6 @@ Automated pipeline for generating evaluation rubrics from system reports using C
 
 ## Requirements
 - Python 3.10+
-- Dependencies are listed in [requirements.txt](requirements.txt).
 - Rubric building scripts require Claude API.
 
 ## Quick Set Up
