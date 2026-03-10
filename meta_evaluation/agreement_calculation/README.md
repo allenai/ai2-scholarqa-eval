@@ -92,6 +92,7 @@ The script generates three types of analysis:
     <img src="images/table3.png" alt="Image 2" style="width: 40%;">
     <figcaption>Table 3: Pairwise agreements between expert overall preference ranking vs. model scores.</figcaption>
 </figure>
+
 <br>
 
 **Overall Preference; Random assignment. All Data.**
@@ -117,6 +118,7 @@ python calculate_agreement.py --human_agreed
     <img src="images/table4.png" alt="Image 1" style="width: 40%;">
     <figcaption style="width:90%">Table 4: Results from metric-wise evaluation with expertise control. We compare instance-level agreement between model scores and two human signals: human preference (TOP) and  metric-wise human ratings (BOTTOM).</figcaption>
 </figure>
+
 <br>
 
 **Near-Expert & Deep-Expert**
