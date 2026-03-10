@@ -37,7 +37,7 @@ To run **meta-evaluation analyses**:
 ```
 cd meta_evaluation/ 
 ```
-See [`rubric_building/README.md`](rubric_building/README.md) for details.
+See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
 
 <br>
 
@@ -59,7 +59,8 @@ To specify your key run:
     ```
     export ANTHROPIC_API_KEY='your-api-key-here'
     ```
-See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
+See [`rubric_building/README.md`](rubric_building/README.md) for details.
+
 
 
 
