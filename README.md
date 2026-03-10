@@ -31,15 +31,21 @@ cd ai2-scholarqa-eval
 conda create -n sqaeval python=3.10
 conda activate sqaeval
 ```
-<br>
+
+Both scripts uses API key to run Claude. However, sanity-check test runs 
+(default set up; quick run without API call) will let you execute the script without it.
+To specify your key run:
+```
+export ANTHROPIC_API_KEY='your-api-key-here'
+```
+
 
 To run **meta-evaluation analyses**:
 ```
 cd meta_evaluation/ 
 ```
-See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
+👉 See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
 
-<br>
 
 To run **rubric building**:
 
@@ -53,13 +59,7 @@ To run **rubric building**:
     python rubric_building/2_unify_ingredients.py
     ```
 
-- Both scripts uses API key to run Claude. However, sanity-check test runs 
-(default set up; quick run without API call) will let you execute the script without it.
-To specify your key run:
-    ```
-    export ANTHROPIC_API_KEY='your-api-key-here'
-    ```
-See [`rubric_building/README.md`](rubric_building/README.md) for details.
+👉 See [`rubric_building/README.md`](rubric_building/README.md) for details.
 
 
 
