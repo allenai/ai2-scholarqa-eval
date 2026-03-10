@@ -2,7 +2,7 @@
 
 This directory contains code and data supporting the paper:
 
-> Hwang et al. 2026, *Deep Research, Shallow Evaluation: A Case Study in Meta-Evaluation for Long-Form QA Benchmarks* [Paper (forthcoming)]
+> Hwang et al. 2026, *Deep Research, Shallow Evaluation: A Case Study in Meta-Evaluation for Long-Form QA Benchmarks* [[Paper]](https://arxiv.org/abs/2603.06942)
 
 We conduct a case study in meta-evaluation for the ScholarQA-CS2 long-form scientific QA benchmark. We validate the benchmark through human pairwise preference judgments and critically examine this approach's strengths, weaknesses, and confounders—showing that pairwise preferences are best suited for system-level evaluation, while metric-wise annotations and annotator expertise are critical for reliable metric-level assessment.
 
@@ -47,9 +47,13 @@ The `agreement_calculation/` directory contains annotation data and the analysis
 If you use this code or data, please cite:
 
 ```bibtex
-@article{hwang2026deepresearch,
-  title     = {Deep Research, Shallow Evaluation: A Case Study in Meta-Evaluation for Long-Form QA Benchmarks},
-  author    = {Hwang et al.},
-  year      = {2026}
+@misc{hwang2026deepresearchshallowevaluation,
+      title={Deep Research, Shallow Evaluation: A Case Study in Meta-Evaluation for Long-Form QA Benchmarks}, 
+      author={Jena D. Hwang and Varsha Kishore and Amanpreet Singh and Dany Haddad and Aakanksha Naik and Malachi Hamada and Jonathan Bragg and Mike D'Arcy and Daniel S. Weld and Lucy Lu Wang and Doug Downey and Sergey Feldman},
+      year={2026},
+      eprint={2603.06942},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2603.06942}, 
 }
 ```

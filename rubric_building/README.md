@@ -16,20 +16,6 @@ The remaining three metrics are as follows. Further details are available in the
 * **Citation Precision**: Fraction of citations in the report that (fully or partially) support associated claims.
 
 
-## Paper Citation
-```
-@misc{bragg2025astabenchrigorousbenchmarkingai,
-      title={AstaBench: Rigorous Benchmarking of AI Agents with a Scientific Research Suite}, 
-      author={Jonathan Bragg and Mike D'Arcy and Nishant Balepur and Dan Bareket and Bhavana Dalvi and Sergey Feldman and Dany Haddad and Jena D. Hwang and Peter Jansen and Varsha Kishore and Bodhisattwa Prasad Majumder and Aakanksha Naik and Sigal Rahamimov and Kyle Richardson and Amanpreet Singh and Harshit Surana and Aryeh Tiktinsky and Rosni Vasu and Guy Wiener and Chloe Anastasiades and Stefan Candra and Jason Dunkelberger and Dan Emery and Rob Evans and Malachi Hamada and Regan Huff and Rodney Kinney and Matt Latzke and Jaron Lochner and Ruben Lozano-Aguilera and Cecile Nguyen and Smita Rao and Amber Tanaka and Brooke Vlahos and Peter Clark and Doug Downey and Yoav Goldberg and Ashish Sabharwal and Daniel S. Weld},
-      year={2025},
-      eprint={2510.21652},
-      archivePrefix={arXiv},
-      primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2510.21652}, 
-}
-```
-
-
 ## Overview
 
 The rubric building process consists of two main stages:
@@ -247,6 +233,20 @@ unifier_models:
   "case_id": "unique_id",
   "annotator": "auto",
   "exp": "experiment_name"
+}
+```
+
+
+## Citation
+```
+@misc{bragg2025astabenchrigorousbenchmarkingai,
+      title={AstaBench: Rigorous Benchmarking of AI Agents with a Scientific Research Suite}, 
+      author={Jonathan Bragg and Mike D'Arcy and Nishant Balepur and Dan Bareket and Bhavana Dalvi and Sergey Feldman and Dany Haddad and Jena D. Hwang and Peter Jansen and Varsha Kishore and Bodhisattwa Prasad Majumder and Aakanksha Naik and Sigal Rahamimov and Kyle Richardson and Amanpreet Singh and Harshit Surana and Aryeh Tiktinsky and Rosni Vasu and Guy Wiener and Chloe Anastasiades and Stefan Candra and Jason Dunkelberger and Dan Emery and Rob Evans and Malachi Hamada and Regan Huff and Rodney Kinney and Matt Latzke and Jaron Lochner and Ruben Lozano-Aguilera and Cecile Nguyen and Smita Rao and Amber Tanaka and Brooke Vlahos and Peter Clark and Doug Downey and Yoav Goldberg and Ashish Sabharwal and Daniel S. Weld},
+      year={2025},
+      eprint={2510.21652},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2510.21652}, 
 }
 ```
 
