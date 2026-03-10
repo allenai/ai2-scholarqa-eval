@@ -1,8 +1,8 @@
 import os
 import json
+import pandas as pd
 import time
 import tqdm
-import pandas as pd
 import yaml
 
 from pathlib import Path
@@ -83,11 +83,14 @@ def compile_answers(solver_reports):
 
 
 def main(config: dict):
-    if os.path.isdir(config['solver_reports_path']):
-        solver_reports = Path(config['solver_reports_path'])
-    else:
-        print(f"Exiting the solver_reports_path ({config['solver_reports_path']}) does not exist.")
-        exit(1)
+    solver_reports = Path(config['solver_reports_path'])
+
+    if not os.path.isdir(config['solver_reports_path']):
+        solver_reports = Path(os.path.join(os.path.dirname(__file__), config['solver_reports_path']))
+        print(solver_reports)
+        if not os.path.isdir(solver_reports):
+            print(f"Exiting the solver_reports_path ({config['solver_reports_path']}) does not exist.")
+            exit(1)
 
 
     log_dir = os.path.join(os.path.dirname(__file__), config['log_dir'] if config['log_dir'] != '' else default_log_dir)
@@ -107,15 +110,15 @@ def main(config: dict):
         df, _ = format_outputs(df_input, log_dir=log_dir, timestamp=timestamp)
 
     if config['batch_run']:
-        print('Batch processing')
+        print('Processing: Batch Run')
         requests = collect_requests(df, config['extractor_model'], config['query_constraints'] if config['query_constraints'] else None, config['query_excludes'] if config['query_excludes'] else None, log_dir=log_dir, timestamp=timestamp)
         if config['sanity_check']:
-            print('SANITY CHECK ON')
+            print('SANITY CHECK ON (Log files created; No API call)')
             pass
         else:
             batch_id = make_batch_request(requests, client=Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"]))
     else:
-        print('Individual processing') # the generations are appended to the output file
+        print('Processing: Individual Run')
         model_outfile = f'{log_dir}/indiv-extractions.json'
 
         generate_claude(df, config['extractor_model'], model_outfile,  config['query_constraints'] if config['query_constraints'] else None, config['query_excludes'] if config['query_excludes'] else None, config['sanity_check'])

@@ -12,15 +12,12 @@ This repository includes:
 1. Code and annotated data from in the human meta-evaluation conducted over of ScholarQA-CS2 **[1]**. 
 2. The implementation of the automated rubric building pipeline supporting ScholarQA-CS2 discussed and released with AstaBench **[2]**. ScholarQA-CS2's [rubrics](https://huggingface.co/datasets/allenai/asta-bench/tree/main/tasks/sqa) are generated via this pipeline. 
 
-### Meta-Evaluation
+**Meta-Evaluation**:
 Analysis of agreement between human and automated model evaluations in pairwise comparisons of ScholarQA-CS2 Eval system outputs. Supports multiple evaluation strategies, inter-annotator agreement calculation, and optimal threshold tuning.
 
-See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
 
-### Rubric Building
+**Rubric Building**:
 Automated pipeline for generating evaluation rubrics from system reports using Claude's API. Extracts key requirements from reports and unifies them into comprehensive, weighted evaluation criteria.
-
-See [`rubric_building/README.md`](rubric_building/README.md) for details.
 
 
 ## Requirements
@@ -37,17 +34,37 @@ conda create -n sqaeval python=3.10
 conda activate sqaeval
 pip install -r requirements.txt
 ```
+<br>
 
-To run meta-evaluation analyses:
+To run **meta-evaluation analyses**:
 ```
 cd meta_evaluation/ 
 ```
+See [`rubric_building/README.md`](rubric_building/README.md) for details.
 
-To run rubric building:
+<br>
+
+To run **rubric building**:
+
+- For generating ingredients (step 1 of the pipeline):
+    
+    ```
+    python rubric_building/1_generate_ingredients.py
+    ```
+- For unifying ingredients into rubric (step 2):
+    ```
+    python rubric_building/2_unify_ingredients.py
+    ```
+
+See [`meta_evaluation/README.md`](meta_evaluation/README.md) for details.
+
+Both scripts uses API key to run Claude. However, sanity-check test runs 
+(default set up; quick run without API call) will let you execute the script without it.
+To specify your key run:
 ```
 export ANTHROPIC_API_KEY='your-api-key-here'
-cd rubric_building/
 ```
+
 
 ## License
 

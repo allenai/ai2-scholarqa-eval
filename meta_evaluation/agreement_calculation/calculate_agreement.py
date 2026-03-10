@@ -144,8 +144,6 @@ def get_decision(score1, score2, threshold=None):
             return -1
 
 def calculate_agreement(data, human_metric, model_metric, threshold, drop_elicit=False, tie_strategy="threshold", subselect_models=None):
-    if subselect_models is None:
-        subselect_models = []
     model_human_agreements = 0
     total = 0
     human = []
@@ -164,7 +162,7 @@ def calculate_agreement(data, human_metric, model_metric, threshold, drop_elicit
         if drop_elicit and 'elicit' in entry['models']:
             continue
 
-        if subselect_models and (entry['models'][0] not in subselect_models or entry['models'][
+        if subselect_models is not None and (entry['models'][0] not in subselect_models or entry['models'][
                 1] not in subselect_models):
             continue
 
@@ -222,8 +220,6 @@ def calculate_agreement(data, human_metric, model_metric, threshold, drop_elicit
 
 
 def calculate_agreement_two_annot(data1, data2, human_metric, model_metric, threshold, drop_elicit=False, tie_strategy="threshold", subselect_models=None):
-    if subselect_models is None:
-        subselect_models = []
     a1 = calculate_agreement(data1, human_metric, model_metric, threshold, drop_elicit=drop_elicit, tie_strategy=tie_strategy, subselect_models=subselect_models)
     a2 = calculate_agreement(data2, human_metric, model_metric, threshold, drop_elicit=drop_elicit, tie_strategy=tie_strategy, subselect_models=subselect_models)
 
@@ -282,8 +278,6 @@ def run_tie_calibration(data, metric_pairs, all_results):
 
 
 def run_metric(setting, comparison_metric_pairs, threshold_per_metric, use_threshold=False, tie_strategy="threshold", data = None, data_1 = None, data_2 = None, drop_elicit=False, subselect_models=None):
-    if subselect_models is None:
-        subselect_models = []
     save_for_print = []
     for human_metric, model_metric in comparison_metric_pairs:
         threshold = threshold_per_metric[model_metric]
@@ -301,10 +295,10 @@ def run_metric(setting, comparison_metric_pairs, threshold_per_metric, use_thres
             'human_metric': human_metric,
             'model_metric': model_metric,
             'size': total,
-            'agreements': agreements,
+            'n': agreements,
             'agreement': agreement_rate,
             'tau': tau,
-            'threshold': threshold,
+            'threshold_used': threshold,
             })
     df = pd.DataFrame(save_for_print)
     print(df.to_string())
@@ -405,15 +399,13 @@ def system_rankings(data, drop_elicit = False):
     return dfout, system_corr_preference
 
 def calculate_iaa(annotator_data, drop_elicit = False, subselect_models=None):
-    if subselect_models is None:
-        subselect_models = []
     annotator_choice = {}
     for i, a_data in enumerate(annotator_data):
         for entry in a_data:
             if drop_elicit and 'elicit' in entry['models']:
                 continue
 
-            if subselect_models and (entry['models'][0] not in subselect_models or entry['models'][
+            if subselect_models is not None and (entry['models'][0] not in subselect_models or entry['models'][
                 1] not in subselect_models):
                 continue
 
@@ -513,7 +505,7 @@ def main():
         print("No data found.")
         sys.exit(1)
 
-    subselect_models = args.subselect_models.split(',') if args.subselect_models != '' else []
+    subselect_models = args.subselect_models.split(',') if args.subselect_models != '' else None
     if subselect_models:
         for m in subselect_models:
             if m not in all_model_list:

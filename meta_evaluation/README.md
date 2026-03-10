@@ -12,7 +12,9 @@ We conduct a case study in meta-evaluation for the ScholarQA-CS2 long-form scien
 meta_evaluation/
 ├── system_reports/         # System outputs for evaluated QA systems
 │   ├── dev/                # Dev split (100 questions)
-│   └── test/               # Test split (100 questions)
+│   ├── test/               # Test split (100 questions)
+│   └── expert_written/     # Expert-written questions (25 questions, used for Deep-Expertise setting)
+├── annotation_docs/        # Instructions used for guidelines
 └── agreement_calculation/  # Agreement analysis code and annotation data
 ```
 
@@ -22,19 +24,19 @@ The `system_reports/` directory contains the raw outputs from each evaluated sys
 
 The following systems are included:
 
-| System | File |
-|--------|------|
-| ScholarQA (SQA) | `sqa.json` |
-| ScholarQA + Qwen3-8B SFT | `sqa-qwen3_8b_SFT_fullanswer.json` |
-| Claude Sonnet 4 | `claude-sonnet-4-20250514.json` |
-| Gemini 2.5 Pro | `gemini-2.5-pro-preview-03-25.json` |
-| Elicit | `elicit.json` |
-| Falcon | `falcon.json` |
-| OpenAI Deep Research | `openai-dr.json` |
-| Perplexity | `perplexity.json` |
-| SciSpace | `scispace.json` |
-| STORM | `storm.json` |
-| You.com | `you.json` |
+| System | File | Used for Meta Evaluation    |
+|--------|------|-----------------------------|
+| ScholarQA (SQA) | `sqa.json` | ✔                           |
+| ScholarQA + Qwen3-8B SFT | `sqa-qwen3_8b_SFT_fullanswer.json` | ✔                           |
+| Claude Sonnet 4 | `claude-sonnet-4-20250514.json` |                             |
+| Gemini 2.5 Pro | `gemini-2.5-pro-preview-03-25.json` | ✔                           |
+| Elicit | `elicit.json` | ✔ (test and dev set only)   |
+| Falcon | `falcon.json` | ✔ (expert-written set only) |
+| OpenAI Deep Research | `openai-dr.json` | ✔                           |
+| Perplexity | `perplexity.json` | ✔                           |
+| SciSpace | `scispace.json` |                             |
+| STORM | `storm.json` | ✔                           |
+| You.com | `you.json` |                             |
 
 ## Agreement Calculation
 

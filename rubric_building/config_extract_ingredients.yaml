@@ -1,11 +1,11 @@
 batch_run: true
-sanity_check: true
+sanity_check: true # will run the script but stop short of API call
 specific_solvers:
 #  - 'claude_llm'
 #  - 'gemini_pro_llm'
 query_constraints: []
 query_excludes: []
 experiment_name: sample-queries
-solver_reports_path: ../meta_evaluation/system_reports/test/
+solver_reports_path: ../meta_evaluation/system_reports/test/ # !! Absolute path or Path relative to script; using system reports from 10 sources obtained for on test set questions
 log_dir: logs_extraction
 extractor_model: claude-opus-4-20250514 # Assumes Claude Use

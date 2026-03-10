@@ -66,8 +66,18 @@ def main(config: dict):
     os.makedirs(log_dir, exist_ok=True)
 
     timestamp = time.strftime("%Y%m%d-%H%M")
-    with open(config['all_ingredients_file']) as f:
+
+    all_ingredients_file = config['all_ingredients_file']
+    if not os.path.isfile(all_ingredients_file):
+        all_ingredients_file = os.path.join(os.path.dirname(__file__), config['all_ingredients_file'])
+
+        if not os.path.isfile(all_ingredients_file):
+            print(f"Exiting the solver_reports_path ({config['all_ingredients_file']}) does not exist.")
+            exit(1)
+
+    with open(all_ingredients_file) as f:
         df = pd.read_json(f, lines=True)
+
     print('Models:', config['unifier_models'])
     all_solvers = set(df.solver.tolist())
     batch_id = None
@@ -82,16 +92,17 @@ def main(config: dict):
     exp_sets.append(df_unified)
 
     if config['batch_run']:
-        print('Batch processing')
+        print('Processing: Batch Run')
         requests = collect_requests(exp_sets, config['unifier_models'], config['query_constraints'] if config['query_constraints'] else None, config['query_excludes'] if config['query_excludes'] else None, log_dir=log_dir, timestamp=timestamp)
         if config['sanity_check']:
-            print('SANITY CHECK ON')
+            print('SANITY CHECK ON (Log files created; No API call)')
             pass
         else:
             client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
             batch_id = make_batch_request(requests, client)
     else:
-        print('Individual processing') # the generations are appended to the output file
+        # the generations are appended to the output file
+        print('Processing: Individual Run')
         model_outfile = os.path.join(log_dir,'indiv-unified-generations.json')
 
         for model in config['unifier_models']:
