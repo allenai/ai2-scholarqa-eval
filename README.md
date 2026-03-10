@@ -31,7 +31,6 @@ git clone https://github.com/allenai/ai2-scholarqa-eval.git
 cd ai2-scholarqa-eval
 conda create -n sqaeval python=3.10
 conda activate sqaeval
-pip install -r requirements.txt
 ```
 <br>
 
