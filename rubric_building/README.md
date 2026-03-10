@@ -20,7 +20,7 @@ The remaining three metrics are as follows. Further details are available in the
 
 The rubric building process consists of two main stages:
 
-1. **Ingredient Extraction** - Analyzes system reports to identify key requirements and criteria.
+1. **Ingredient Extraction** - Analyzes system reports to identify key requirements and criteria. 
    1. In our study we extract report from 10 sources:
       1. 8 deep-research agents with retrieval: 
          * `ScholarQA` [(Singh et al. 2025](https://arxiv.org/abs/2504.10861); [asta.allenai.ai](https://asta.allen.ai/synthesize))
@@ -44,15 +44,17 @@ The rubric building process consists of two main stages:
 
 ```
 rubric_building/
-├── 1_generate_ingredients.py      # Stage 1: Extract ingredients from reports
+├── 1_generate_ingredients.py       # Stage 1: Extract ingredients from reports
 ├── 2_unify_ingredients.py          # Stage 2: Unify ingredients into rubrics
-├── claude_process_batch.py        # Process batch API results
-├── utils_rubric_building.py       # Utility functions (JSON parsing, batch requests)
+├── claude_process_batch.py         # Process batch API results
+├── utils/
+    ├── utils_rubric_building.py    # Utility functions (JSON parsing, batch requests)
+    └── prompts.py                  # Prompts for extraction and unification
 ├── config_extract_ingredients.yaml # Configuration for extraction stage
 ├── config_unify_ingredients.yaml   # Configuration for unification stage
-├── logs_extraction/               # Extraction stage outputs
-├── logs_unification/              # Unification stage outputs
-└── outputs/                       # Final rubrics
+├── logs_extraction/                # Extraction stage outputs
+├── logs_unification/               # Unification stage outputs
+└── outputs/                        # Final rubrics
 ```
 
 ## Requirements
