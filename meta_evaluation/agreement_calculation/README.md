@@ -82,27 +82,19 @@ The script generates three types of analysis:
 
 (Please note that the tables reflect the numbering in the paper.)
 
-<div style="display: flex; justify-content: space-between; padding-left:100px">
-    <div style="display: flex; flex-direction: column; width:48%;">
-        <figure style="margin: 0 0 10px 0;">
-            <img src="images/table2.png" alt="Image 1" style="width: 70%;">
-            <figcaption>Table 2: System and instance-level correlations (Kendall Tau-b).</figcaption>
-        </figure>
-        <figure style="margin: 10px 0 0 0; ">
-            <img src="images/table3.png" alt="Image 2" style="width: 80%;">
-            <figcaption>Table 3: Pairwise agreements between expert overall preference ranking vs. model scores.</figcaption>
-        </figure>
-    </div>
-    <div style="display: flex; flex-direction: column; width:48%">
-        <figure style="margin: 0;">
-            <img src="images/table4.png" alt="Image 1" style="width: 90%;">
-            <figcaption style="width:90%">Table 4: Results from metric-wise evaluation with expertise control. We compare instance-level agreement between model scores and two human signals: human preference (TOP) and  metric-wise human ratings (BOTTOM).</figcaption>
-        </figure>
-    </div>
-</div>
+### Tables 2 & 3
+<figure>
+    <img src="images/table2.png" alt="Image 1" style="width: 25%;">
+    <figcaption>Table 2: System and instance-level correlations (Kendall Tau-b).</figcaption>
+</figure>
+
+<figure>
+    <img src="images/table3.png" alt="Image 2" style="width: 30%;">
+    <figcaption>Table 3: Pairwise agreements between expert overall preference ranking vs. model scores.</figcaption>
+</figure>
 
 
-**Tables 2 & 3**: 
+**Overall Preference; Random assignment. All Data.**
 ```
 python calculate_agreement.py
 ```
@@ -111,7 +103,7 @@ python calculate_agreement.py
 * See corr with overall score under "Pairwise Agreements" in the output for instance-level correlation result (Table 2, All Data).
 * Use `--drop_elicit` for "w/o Elicit" result.
 
-**Tables 2 & 3**: Overall Preference; Random assignment. Expert-Agreed only.
+**Overall Preference; Random assignment. Expert-Agreed only.**
 ```
 python calculate_agreement.py --human_agreed
 ```
@@ -120,7 +112,14 @@ python calculate_agreement.py --human_agreed
 * See corr with overall score under "Pairwise Agreements"  in the output for instance-level correlation result (Table 2, Expert-Agreed).
 * Use `--drop_elicit` for "w/o Elicit" result.
 
-**Table 4**: Near-Expert & Deep-Expert
+### Table 4
+<figure>
+    <img src="images/table4.png" alt="Image 1" style="width: 30%;">
+    <figcaption style="width:90%">Table 4: Results from metric-wise evaluation with expertise control. We compare instance-level agreement between model scores and two human signals: human preference (TOP) and  metric-wise human ratings (BOTTOM).</figcaption>
+</figure>
+
+
+**Near-Expert & Deep-Expert**
 ```
 python calculate_agreement.py --source {near_expert|deep_expert}
 ```
