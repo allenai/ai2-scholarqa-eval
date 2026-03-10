@@ -20,7 +20,7 @@ The remaining three metrics are as follows. Further details are available in the
 
 The rubric building process consists of two main stages:
 
-1. **Ingredient Extraction** - Analyzes system reports to identify key requirements and criteria. 
+1. **Ingredient Extraction** - Analyzes system reports to identify key requirements and criteria. [[See Prompt]](https://github.com/allenai/ai2-scholarqa-eval/blob/84cb60c8352778f6c8c964b49ca63cb2e41e5c9c/rubric_building/utils/prompts.py#L1)
    1. In our study we extract report from 10 sources:
       1. 8 deep-research agents with retrieval: 
          * `ScholarQA` [(Singh et al. 2025](https://arxiv.org/abs/2504.10861); [asta.allenai.ai](https://asta.allen.ai/synthesize))
@@ -34,7 +34,7 @@ The rubric building process consists of two main stages:
       2. 2 LLMs without retrieval: 
          * `Claude Sonnet 4.0 without thinking` [(anthropic.com)](https://www.anthropic.com/)
          * `Google’s Gemini 2.5 Pro` [(gemini.google.com)](https://gemini.google.com)
-2. **Ingredient Unification** - Consolidates ingredients from multiple sources into coherent, non-overlapping rubrics
+2. **Ingredient Unification** - Consolidates ingredients from multiple sources into coherent, non-overlapping rubrics. [[See Prompt]](https://github.com/allenai/ai2-scholarqa-eval/blob/84cb60c8352778f6c8c964b49ca63cb2e41e5c9c/rubric_building/utils/prompts.py#L41)
 
 
 **Average Cost Estimation**: The estimated cost of running the full rubric-generation pipeline in batch mode for 100 instances using Claude-Opus-4.5 was $120 (July–October 2025).
