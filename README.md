@@ -10,7 +10,7 @@ This repository contains code and data from **ScholarQA-CS2 Evaluations**, and i
 
 This repository includes:
 1. Code and annotated data from in the human meta-evaluation conducted over of ScholarQA-CS2 **[1]**. 
-2. The implementation of the automated rubric building pipeline supporting ScholarQA-CS2 discussed and released with AstaBench **[2]**. ScholarQA-CS2's [rubrics](https://huggingface.co/datasets/allenai/asta-bench/tree/main/tasks/sqa) are generated via this pipeline. 
+2. The implementation of the automated rubric building pipeline supporting ScholarQA-CS2 discussed and released with AstaBench **[2]**. ScholarQA-CS2's [rubrics](https://huggingface.co/datasets/allenai/asta-bench/tree/main/tasks/sqa) (see `*_recomputed.json`) are generated via this pipeline. 
 
 **Meta-Evaluation**:
 Analysis of agreement between human and automated model evaluations in pairwise comparisons of ScholarQA-CS2 Eval system outputs. Supports multiple evaluation strategies, inter-annotator agreement calculation, and optimal threshold tuning.
