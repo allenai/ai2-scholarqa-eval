@@ -11,8 +11,7 @@ This repository contains code and data from **ScholarQA-CS2 Evaluations**, and i
 This repository includes:
 
 * **Meta-Evaluation Code and Data**:
-Code and annotated data from in the human meta-evaluation conducted over of ScholarQA-CS2 **[1]**. It includes, analysis of agreement between human and automated model evaluations in pairwise comparisons of ScholarQA-CS2 Eval system outputs. Supports multiple evaluation strategies, inter-annotator agreement calculation, and optimal threshold tuning.
-
+  [Code](https://github.com/allenai/ai2-scholarqa-eval/tree/main/meta_evaluation/agreement_calculation/) and [human (preference) annotated data](https://github.com/allenai/ai2-scholarqa-eval/tree/main/meta_evaluation/agreement_calculation/annotation) from in the human meta-evaluation conducted over of ScholarQA-CS2 **[1]**. It includes, analysis of agreement between human and automated model evaluations in pairwise comparisons of ScholarQA-CS2 Eval system outputs. We also include [deep-research system responses](https://github.com/allenai/ai2-scholarqa-eval/tree/main/meta_evaluation/system_reports) used for meta-evaluation.
 
 * **Rubric Building Pipeline**:
 The implementation of the automated rubric building pipeline supporting ScholarQA-CS2 discussed and released with AstaBench **[2]**. ScholarQA-CS2's [rubrics](https://huggingface.co/datasets/allenai/asta-bench/tree/main/tasks/sqa) (see `*_recomputed.json`) are generated via this pipeline. 
@@ -61,13 +60,9 @@ To run **rubric building**:
 
 👉 See [`rubric_building/README.md`](rubric_building/README.md) for details.
 
-
-
-
 ## License
 
 The code is licensed under Apache 2.0. The data is licensed under ODC-BY 1.0. The artifacts are intended for research and educational use in accordance with Ai2's Responsible Use Guidelines. 
-
 
 ## How to Cite
 
